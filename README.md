@@ -33,23 +33,23 @@
  
 ---
 **🥑 3. What are the potential challenges or issues that may arise when handling bidirectional streaming in Rust gRPC, especially in scenarios like chat applications?**
-  1. Sinkronisasi dan Urutan Pesan
+  1. **Sinkronisasi dan Urutan Pesan**
 
      Karena _server_ dan _client_ bisa saling kirim pesan kapan aja, kita harus pastiin pesan-pesan itu gak ketuker urutannya atau bahkan hilang. Solusinya gunakan channel _asynchronous_ seperti 'tokio::sync::mpsc', dan implementasikan sistem penomoran pesan atau _timestamp_ biar gampang diatur 
   
-  2. Manajemen Koneksi dan Deteksi Kesalahan
+  2. **Manajemen Koneksi dan Deteksi Kesalahan**
 
-     Koneksi _streaming_ yang terus-menerus rentan terhadap putus koneksi, _client_ tidak responsif, atau _timeout_ jaringan. Hal ini penting untuk ditangani agar server tidak terus menunggu pesan dari _client_ yang sudah terputus. Makanya perlu dicek terus koneksinya aktif atau nggak (pakai _heartbeat_, _timeout_, atau _retry_ berbasis `tokio::time::timeout`.), dan kalau putus, bisa nyambung lagi dengan aman
+     Koneksi _streaming_ yang terus-menerus rentan terhadap putus koneksi, _client_ tidak responsif, atau _timeout_ jaringan. Hal ini penting untuk ditangani agar server tidak terus menunggu pesan dari _client_ yang sudah terputus. Makanya perlu dicek terus koneksinya aktif atau nggak (pakai _heartbeat_, _timeout_, atau _retry_ berbasis `tokio::time::timeout`), dan kalau putus, bisa nyambung lagi dengan aman
   
-  3. Skalabilitas dan Konsumsi Resource
+  3. **Skalabilitas dan Konsumsi Resource**
 
      Aplikasi chat berskala besar bisa memiliki ratusan atau ribuan klien yang terhubung secara bersamaan, nah server harus kuat menangani semua _streaming_ itu tanpa jadi lambat. Jadi penting banget pakai sistem yang hemat memori dan nggak bikin CPU kerja keras terus. Rust + _async_ (pakai _tokio_) bantu banget buat hal ini.
 
-  4. Keamanan dan Validasi Data
+  4. **Keamanan dan Validasi Data**
 
      Setiap pesan yang dikirim oleh _client_ harus divalidasi agar tidak mengandung skrip berbahaya (XSS atau injeksi data) dan digunakan untuk spam atau serangan **DoS**. Makanya, harus ada _middleware_ validasi sebelum pesan diproses, pembatasan ukuran dan frekuensi pesan, dan serta otentikasi tiap klien.
      
-  5. Race Condition dan Deadlock
+  5. **Race Condition dan Deadlock**
 
      Karena semuanya jalan bareng-bareng (_asynchronous_), kadang dua hal bisa kejadian bersamaan dan bentrok. Ini bisa bikin _error_ aneh atau malah aplikasi macet. Solusinya manfaatkan `tokio::select!` untuk menangani banyak task secara aman, dan pastikan tidak ada _dependency_ siklik antar _resource_.
 
@@ -136,7 +136,7 @@
 ---
 **🍒 9. How does the request-response model of REST APIs contrast with the bidirectional streaming capabilities of gRPC in terms of real-time communication and responsiveness?**
 
-**REST API dan Model Request-Response**
+**A. REST API dan Model Request-Response**
 
 **REST API** menggunakan model permintaan dan jawaban (_request-response_), artinya 
 - Klien harus mengirimkan request terlebih dahulu untuk mendapatkan _response_ dari server.
@@ -144,7 +144,7 @@
 - Dalam aplikasi _real-time_, **REST** kurang efisien, karena klien harus melakukan polling berulang kali (mengirim permintaan setiap beberapa detik) hanya untuk mengecek apakah ada data baru.
 - **Contoh kasus** : Aplikasi _chat_ dengan **REST** perlu mengirim permintaan setiap beberapa detik untuk mengecek pesan baru. Ini membuatnya tidak efisien dan lambat merespons perubahan data.
 
-**gRPC dan Bidirectional Streaming**
+**B. gRPC dan Bidirectional Streaming**
 
 **gRPC** mendukung bidirectional streaming, artinya
 - Klien dan server bisa mengirim dan menerima data secara bersamaan dan berkelanjutan dalam satu koneksi terbuka.
